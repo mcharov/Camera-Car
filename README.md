@@ -12,4 +12,4 @@ To use the manual mode:
 2. On your local computer, open a browser to the location of the flask server (printed out in console). It is in the form of "http://raspberry pi ip:5000/".
 
 To use the voice-controlled mode:
-1. 
+1. Simply run the launch_camera_car_rpi.sh on the RaspberryPi and the launch_camera_car_windows.bat on your local computer (must be windows). Make sure to be in the current working directory for both.
