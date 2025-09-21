@@ -1,0 +1,106 @@
+<html>
+<head>
+<title>Camera Car Stream</title>
+</head>
+<body>
+<h1>Camera Car Stream<h1>
+<img src="http://192.168.50.162:8000/stream.mjpg" width="1920" height="1080" /><BR>
+
+<!-- Add a simple form -->
+<form id="commandForm">
+    <label for="commandInput">Send Voice Command:</label>
+    <input type="text" id="commandInput" name="commandInput" />
+    <button type="submit">Send</button>
+</form>
+
+<BR>
+Websocket status:<br>
+<div id="ws-status"> Waiting... </div>
+<br>
+
+<script>
+    ws=new WebSocket("ws://192.168.50.162:5000/echo");
+    ws.onopen = function(evt) {
+            log("Connected.");
+        };
+
+    ws.onmessage = function(evt) {
+            //log("GOT "+evt.data+".");
+        };
+
+    ws.onclose = function(evt) {
+            log("Closed.<BR>");
+        };
+    ws.onerror=function(evt){
+        log(evt.data);
+        }
+    document.addEventListener("keydown", function(event) {
+        if (event.repeat) return;
+        if (event.keyCode == 87) {
+            //log("keydown W");
+            ws.send("forward:1");
+        } else if (event.keyCode == 83) {
+            //log("keydown S");
+            ws.send("backward:1");
+        } else if (event.keyCode == 68) {
+            //log("keydown D");
+            ws.send("right:1");
+        } else if (event.keyCode == 65) {
+            //log("keydown A");
+            ws.send("left:1");
+        } else {
+            //log("event.keyCode DOWN " + event.keyCode);
+        }
+    });
+    document.addEventListener("keyup", function(event) {
+        if (event.keyCode == 87) {
+            //log("keyup W");
+            ws.send("forward:0");
+        } else if (event.keyCode == 83) {
+            //log("keyup S");
+            ws.send("backward:0");
+        } else if (event.keyCode == 68) {
+            //log("keyup D");
+            ws.send("right:0");
+        } else if (event.keyCode == 65) {
+            //log("keyup A");
+            ws.send("left:0");
+        } else {
+            //log("event.keyCode UP " + event.keyCode);
+        }
+    });
+    document.addEventListener('mousemove', function(e) {
+        var str = "Screen X/Y: " + e.screenX + " / " + e.screenY;
+        str += "<BR>Client X/Y: " + e.clientX + " / " + e.clientY;
+        str += "<BR>Page X/Y: " + document.body.clientWidth + " / " + document.body.clientHeight;
+        ws.send("mm:" + e.clientX + " " + e.clientY + " " + document.body.clientWidth + " " + document.body.clientHeight);
+        document.getElementById("ws-mouse").innerHTML = str;
+    });
+    
+    // Handle form submission
+    document.getElementById("commandForm").addEventListener("submit", function(e) {
+        e.preventDefault(); // Prevent page reload
+        const input = document.getElementById("commandInput").value;
+        if (input) {
+            ws.send("sent:" + input);
+            //log("Sent: " + input);
+            document.getElementById("commandInput").value = "";
+            document.getElementById("commandInput").blur();
+        }
+    });
+    
+    // Focus on form input
+    document.addEventListener("keydown", function(event) {
+    if (event.key === "c" || event.key === "C") {
+        document.getElementById("commandInput").focus();
+    }
+    });
+
+    function log(s) {
+        document.getElementById("ws-status").innerHTML=document.getElementById("ws-status").innerHTML+s+"<BR>";
+    }
+</script>
+<body>
+<img id="cam" src="" width="640" height="480" />
+</body>
+</html>
